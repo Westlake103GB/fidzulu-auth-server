@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { oracleProvider } from './providers/oracle.provider';
 import { ConfigModule } from '@nestjs/config';
+import { OracleModule } from './providers/oracle.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [ConfigModule.forRoot()],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), OracleModule, AuthModule, UsersModule],
   controllers: [AppController],
-  providers: [AppService, oracleProvider],
+  providers: [AppService],
 })
 export class AppModule {}
