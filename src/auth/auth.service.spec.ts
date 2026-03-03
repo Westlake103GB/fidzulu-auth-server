@@ -94,6 +94,31 @@ describe('AuthService', () => {
     );
   });
 
+  it('login should normalize Docker IPv6-mapped IPv4 address before DB call', async () => {
+    executeMock.mockResolvedValue({
+      outBinds: {
+        token: 'jwt.token',
+        userId: 5,
+        role: 'ADMIN',
+      },
+    });
+
+    await expect(
+      service.login('user@example.com', 'Passw0rd!', '::ffff:172.17.0.1'),
+    ).resolves.toEqual({
+      token: 'jwt.token',
+      userId: 5,
+      role: 'ADMIN',
+    });
+
+    expect(executeMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        ip: '172.17.0.1',
+      }),
+    );
+  });
+
   it('refreshToken should return refreshed token string', async () => {
     executeMock.mockResolvedValue({ outBinds: { result: 'new.token' } });
 

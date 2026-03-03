@@ -66,6 +66,8 @@ export class AuthService {
   ): Promise<LoginResponseDto> {
     return this.executeWithConnection(async (connection) => {
       try {
+        const normalizedIp = this.normalizeIpForOracle(ipAddress);
+
         const result = await connection.execute(
           `
           BEGIN
@@ -82,7 +84,7 @@ export class AuthService {
             token: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 4000 },
             email: email ?? null,
             password: password ?? null,
-            ip: ipAddress,
+            ip: normalizedIp,
             userId: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
             role: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 100 },
           },
@@ -97,6 +99,22 @@ export class AuthService {
         this.handleOracleError(error);
       }
     });
+  }
+
+  private normalizeIpForOracle(ipAddress: string | undefined): string {
+    if (typeof ipAddress !== 'string') {
+      return '';
+    }
+
+    let normalizedIp = ipAddress.trim();
+
+    if (normalizedIp.startsWith('::ffff:')) {
+      normalizedIp = normalizedIp.slice('::ffff:'.length);
+    } else if (normalizedIp === '::1') {
+      normalizedIp = '127.0.0.1';
+    }
+
+    return normalizedIp.length <= 16 ? normalizedIp : '';
   }
 
   async refreshToken(payload: RefreshTokenDto): Promise<string> {
