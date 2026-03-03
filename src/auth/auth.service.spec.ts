@@ -69,6 +69,31 @@ describe('AuthService', () => {
     });
   });
 
+  it('login should support guest login when email and password are omitted', async () => {
+    executeMock.mockResolvedValue({
+      outBinds: {
+        token: 'guest.jwt.token',
+        userId: 0,
+        role: 'GUEST',
+      },
+    });
+
+    await expect(service.login(undefined, undefined, '127.0.0.1')).resolves.toEqual({
+      token: 'guest.jwt.token',
+      userId: 0,
+      role: 'GUEST',
+    });
+
+    expect(executeMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        email: null,
+        password: null,
+        ip: '127.0.0.1',
+      }),
+    );
+  });
+
   it('refreshToken should return refreshed token string', async () => {
     executeMock.mockResolvedValue({ outBinds: { result: 'new.token' } });
 
