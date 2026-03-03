@@ -44,6 +44,7 @@ export class AuthService {
             password: payload.password,
             role: payload.role ?? 'USER',
           },
+          { autoCommit: true },
         );
 
         const userId = result.outBinds?.result as number | undefined;

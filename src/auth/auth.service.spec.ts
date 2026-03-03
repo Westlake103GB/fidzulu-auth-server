@@ -51,6 +51,32 @@ describe('AuthService', () => {
     expect(closeMock).toHaveBeenCalled();
   });
 
+  it('register should execute with autoCommit enabled', async () => {
+    executeMock.mockResolvedValue({ outBinds: { result: 101 } });
+
+    await service.register({
+      firstname: 'Fid',
+      lastname: 'Zulu',
+      username: 'fidzulu',
+      email: 'user@example.com',
+      password: 'Passw0rd!',
+      role: 'USER',
+    });
+
+    expect(executeMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        firstname: 'Fid',
+        lastname: 'Zulu',
+        username: 'fidzulu',
+        email: 'user@example.com',
+        password: 'Passw0rd!',
+        role: 'USER',
+      }),
+      expect.objectContaining({ autoCommit: true }),
+    );
+  });
+
   it('login should map token/user/role output', async () => {
     executeMock.mockResolvedValue({
       outBinds: {
